@@ -1,2 +1,3 @@
 # TuiEvolution_Volcanos
 Volcanic Eruption 3D Simulation 🌋
+Ortak bir okul için başlayıp geliştirilen bir proje
