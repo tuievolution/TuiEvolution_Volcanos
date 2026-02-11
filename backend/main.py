@@ -6,7 +6,7 @@ import simulation_logic
 
 app = FastAPI()
 
-# React uygulamasının (farklı portta çalışacağı için) buraya erişmesine izin ver
+# React ile iletişim izni (CORS)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,22 +16,16 @@ app.add_middleware(
 )
 
 # Frontend'den gelecek veri formatı
-class VolcanoData(BaseModel):
+class VolcanoRequest(BaseModel):
     name: str
-    elevation: float # Metre cinsinden yükseklik
-    location: dict   # {lat: ..., lng: ...}
+    elevation: float
+    location: dict
 
 @app.post("/calculate")
-async def calculate_simulation(data: VolcanoData):
-    # 1. Adım: Monte Carlo Parametre Hesabı
-    # Radius varsayılan 500m alındı, elevation parametre olarak geldi.
-    mc_results = simulation_logic.run_monte_carlo(data.elevation, 500)
+async def calculate(data: VolcanoRequest):
+    print(f"Simülasyon isteği alındı: {data.name}, Yükseklik: {data.elevation}m")
     
-    # 2. Adım: Ezilme Hesabı (Impact)
-    impact_results = simulation_logic.calculate_impact(mc_results, data.elevation)
+    # Yeni mantık: Tek bir fonksiyon tüm işi yapar
+    results = simulation_logic.run_simulation(data.elevation)
     
-    return {
-        "monte_carlo": mc_results,
-        "impact": impact_results,
-        "volcano_info": data
-    }
+    return results

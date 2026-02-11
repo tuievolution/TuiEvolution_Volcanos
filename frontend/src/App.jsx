@@ -7,8 +7,8 @@ import { Mountain, Activity, AlertTriangle, Wind, Gauge, CheckCircle } from 'luc
 import L from 'leaflet';
 
 // GÖRSELLERİ İMPORT ET
-import magmaDarkBg from './assets/magma-bg.jpg';       // Dark Mode Resmi (Eski)
-import magmaLightBg from './assets/magma_ligthmode.png'; // Light Mode Resmi (YENİ)
+import magmaDarkBg from './assets/magma-bg.jpg';       // Dark Mode Resmi
+import magmaLightBg from './assets/magma_ligthmode.png'; // Light Mode Resmi
 
 // --- Harita İkonu Düzeltmesi ---
 delete L.Icon.Default.prototype._getIconUrl;
@@ -58,46 +58,44 @@ export default function App() {
     setResults(null);
 
     try {
+      // Backend'e istek atıyoruz
       const response = await axios.post('http://localhost:8000/calculate', {
         name: selectedVolcano.name,
-        elevation: selectedVolcano.elevation,
+        elevation: selectedVolcano.elevation, // Seçilen dağın yüksekliğini gönderiyoruz
         location: { lat: selectedVolcano.position[0], lng: selectedVolcano.position[1] }
       });
       
+      // Biraz gerçekçilik için yapay gecikme (opsiyonel)
       setTimeout(() => {
         setResults(response.data);
         setLoading(false);
-      }, 1500);
+      }, 1000);
 
     } catch (error) {
-      console.error("Hata:", error);
+      console.error("Hesaplama Hatası:", error);
       setLoading(false);
+      alert("Simülasyon sunucusuna bağlanılamadı. Backend'in çalıştığından emin olun.");
     }
   };
 
   // --- DİNAMİK CSS SINIFLARI ---
-  // Light mode input: Kahverengi kenarlık ve metin
   const inputBgClass = darkMode 
     ? 'bg-black/50 border-dark-border text-white placeholder-gray-400' 
     : 'bg-white/80 border-light-border text-stone-800 placeholder-stone-500';
   
-  // Kartlar için stil
   const cardClass = darkMode 
     ? 'bg-dark-surface/90 border-dark-border backdrop-blur-sm' 
-    : 'bg-white/90 border-light-border backdrop-blur-sm shadow-xl'; // Light mode kartları daha temiz beyaz/krem
+    : 'bg-white/90 border-light-border backdrop-blur-sm shadow-xl';
 
   return (
     <div 
       className={`min-h-screen transition-colors duration-500 bg-cover bg-fixed bg-center`}
       style={{
-        // Resmi moda göre değiştiriyoruz
         backgroundImage: `url(${darkMode ? magmaDarkBg : magmaLightBg})`,
-        // Dark modda "hard-light" ile karıştır, Light modda resmi olduğu gibi göster (normal)
         backgroundBlendMode: darkMode ? 'hard-light' : 'normal',
         backgroundColor: darkMode ? '#000000' : 'transparent' 
       }}
     >
-      {/* Light modda resim çok canlıysa diye hafif bir katman, Dark modda karartma */}
       <div className={`min-h-screen w-full ${darkMode ? 'bg-black/70' : 'bg-orange-50/20'}`}>
       
       {/* --- HEADER --- */}
@@ -105,7 +103,6 @@ export default function App() {
           ${darkMode ? 'border-dark-border bg-black/80' : 'border-light-border bg-white/70'}`}>
         <div className="flex items-center gap-3">
           <div className="relative">
-            {/* Yanardağ Simgesi */}
             <Mountain className="text-volcano-red animate-pulse-slow" size={40} strokeWidth={2} />
             <div className="absolute -top-1 right-[35%] w-2 h-2 bg-volcano-orange rounded-full animate-ping"></div>
           </div>
@@ -135,7 +132,6 @@ export default function App() {
         
         {/* --- ÜST KISIM --- */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[500px]">
-            
             {/* SOL: HARİTA */}
             <div className={`md:col-span-2 rounded-xl overflow-hidden border-4 shadow-2xl relative z-0 
                 ${darkMode ? 'border-dark-border' : 'border-light-border'}`}>
@@ -143,7 +139,6 @@ export default function App() {
                     <ChangeView center={selectedVolcano ? selectedVolcano.position : [20, 0]} zoom={selectedVolcano ? 10 : 2} />
                     <TileLayer
                         attribution='&copy; OpenStreetMap'
-                        // Light mod için daha sade/açık renkli harita katmanı
                         url={darkMode 
                           ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" 
                           : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"} 
@@ -168,7 +163,6 @@ export default function App() {
                         <Mountain size={24} className="text-volcano-orange" /> 
                         {selectedVolcano ? selectedVolcano.name : "Yanardağ Seçiniz"}
                     </h2>
-                    
                     {selectedVolcano ? (
                         <div className={`space-y-4 ${darkMode ? 'text-gray-200' : 'text-stone-700'}`}>
                             <div className={`flex justify-between items-center p-2 rounded ${darkMode ? 'bg-black/10' : 'bg-orange-100/50'}`}>
@@ -183,7 +177,7 @@ export default function App() {
                             </div>
                             <div className={`mt-6 p-3 rounded border text-sm font-medium
                               ${darkMode ? 'bg-black/40 border-volcano-red/30' : 'bg-orange-50 border-orange-200 text-stone-600'}`}>
-                                <p>⚠️ Simülasyon ortalama rüzgar ve yoğunluk parametreleri ile çalışacaktır.</p>
+                                <p>⚠️ Simülasyon, seçilen dağın yüksekliği baz alınarak çalıştırılacaktır.</p>
                             </div>
                         </div>
                     ) : (
@@ -192,7 +186,6 @@ export default function App() {
                         </div>
                     )}
                 </div>
-
                 <button 
                     onClick={handleCalculate}
                     disabled={!selectedVolcano || loading}
@@ -205,7 +198,7 @@ export default function App() {
             </div>
         </div>
 
-        {/* --- BAŞLIK --- */}
+        {/* --- SONUÇLAR --- */}
         <div className="text-center py-6">
            <h2 className={`text-3xl font-black uppercase tracking-[0.2em] drop-shadow-md inline-block px-6 py-2 rounded-full backdrop-blur-sm
              ${darkMode ? 'text-volcano-orange bg-black/20' : 'text-stone-800 bg-white/60 border border-light-border'}`}>
@@ -213,7 +206,6 @@ export default function App() {
            </h2>
         </div>
 
-        {/* --- GRID SONUÇLARI --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-10">
             <ResultBox title="1. Monte Carlo Parametreleri" loading={loading} data={results} delay={0} icon={<Activity />} darkMode={darkMode} cardClass={cardClass}>
                 {results && (
