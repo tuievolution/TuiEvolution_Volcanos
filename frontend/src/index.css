@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== CSS DEĞİŞKENLERİ ===== */
+:root {
+  /* SABİT RENKLER (Mod değişse de aynı kalır) */
+  --color-volcano-orange: #ff5722; /* Orta ton - Sabit */
+  --color-volcano-red: #d50000;    /* Koyu Kırmızı - Vurgu */
+  --color-volcano-yellow: #ffc107; /* Parlak Sarı */
+  
+  /* DARK MODE (Siyah - Turuncu - Kırmızı) */
+  --color-dark-bg: #000000;        /* Tam Siyah */
+  --color-dark-surface: #121212;   /* Çok koyu gri/siyah kartlar */
+  --color-dark-border: #b71c1c;    /* Koyu kırmızı sınır */
+  
+  /* LIGHT MODE (Kahve - Açık Kırmızı - Turuncu) - GÜNCELLENDİ */
+  --color-light-bg: #fff8e1;       /* Çok açık bej/krem (Arkaplan resmiyle uyumlu) */
+  --color-light-surface: #ffffff;  /* Kartlar için beyaz (Okunabilirlik için) */
+  --color-light-border: #ff8a65;   /* Açık Kırmızı / Mercan rengi sınır */
+  
+  /* Fontlar */
+  --font-family-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ===== BASE STYLES ===== */
+@layer base {
+  html {
+    font-family: var(--font-family-sans);
+  }
+
+  /* Light Mode Varsayılanları */
+  body {
+    background-color: var(--color-light-bg);
+    color: #4e342e; /* Koyu Kahverengi metin */
+    transition: background-color 0.5s ease, color 0.5s ease;
+  }
+
+  /* Dark Mode Varsayılanları */
+  html.dark body {
+    background-color: var(--color-dark-bg);
+    color: #eeeeee;
+  }
+}
+
+/* Leaflet Harita Düzenlemeleri */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background-color: #222; /* Harita yüklenirken */
+}
